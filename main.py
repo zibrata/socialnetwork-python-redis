@@ -69,7 +69,7 @@ def creer_compte():
 def dashboard(uidPerso):
 	usr = "user:" + str(uidPerso)
 	statut = r.hget(usr, "statut")
-	if statut == None:
+	if statut == "":
 		statut = "Vous n'avez pas encore écrit de statut."
 	pseudoPerso = getPseudo(uidPerso)
 	strRelations = r.hget(usr, "relations")
@@ -102,7 +102,7 @@ def menuPerso(uidPerso):
 	choice = input("\nFaites votre choix : ")
 	
 	while connecte == True:
-		if choice == "1":
+		if choice == "1": # Voir ses demandes d'ajouts
 			# Affiche les notifications de l'user
 			print("\n### NOTIFICATIONS ###\n")
 			usr = "user:" + str(uidPerso)
@@ -157,8 +157,7 @@ def menuPerso(uidPerso):
 
 			connecte = False 
 			menuPerso(uidPerso) # Notifications # Voir ses notifications
-		elif choice == "2":
-			# Cherche un user, l'ajoute (si aucune relation précédente) et envoie une request à l'user concerné
+		elif choice == "2": # Cherche un user, l'ajoute (si aucune relation précédente) et envoie une request à l'user concerné
 			pseudo = input("Ami à ajouter : ")
 			uidFriend = getUser(pseudo)
 			if uidFriend != None and uidPerso != None:
@@ -206,8 +205,8 @@ def menuPerso(uidPerso):
 				print("Cet utilisateur n'existe pas.")
 		
 			connecte = False 		
-			menuPerso(uidPerso) # Ajouter un ami # Ajouter un ami
-		elif choice == "3":
+			menuPerso(uidPerso)
+		elif choice == "3": # Supprimer un ami
 			pseudo = input("Ami à supprimer : ")
 			uidFriend = getUser(pseudo)
 			if uidFriend != None and uidPerso != None:
@@ -239,8 +238,8 @@ def menuPerso(uidPerso):
 			else:
 				print("Cet utilisateur n'existe pas.")
 			connecte = False 		
-			menuPerso(uidPerso) # Supprimer un ami # Supprimer un ami
-		elif choice == "4":
+			menuPerso(uidPerso)
+		elif choice == "4": # Liste d'amis
 			existeAmis = False
 			usr = "user:" + str(uidPerso)
 			strRelations = r.hget(usr, "relations")
@@ -261,18 +260,18 @@ def menuPerso(uidPerso):
 			if existeAmis == False:
 				print("Vous n'avez pas encore d'amis. Utilisez la fonction '2. Ajouter un ami' afin de retrouver vos connaissances.")
 			connecte = False 		
-			menuPerso(uidPerso) # Liste d'amis # Liste d'amis
-		elif choice == "5":
+			menuPerso(uidPerso)
+		elif choice == "5": # Mettre à jour son statut
 			usr = "user:" + str(uidPerso)
 			post = str(input("Mettez à jour votre statut du moment : \n"))
 			r.hset(usr, "statut", post)
 			print("Statut modifié.")
 			connecte = False
-			menuPerso(uidPerso) # Mettre à jour son statut
-		elif choice == "6":
+			menuPerso(uidPerso)
+		elif choice == "6": # Déconnexion / Retour au menu
 			print("Vous êtes déconnecté.")
 			connecte = False
-			main() # Deconnexion / Retour au menu # Déconnexion / Retour au menu
+			main() # Deconnexion / Retour au menu 
 		else: 
 			choice = input("Rentrez une instruction valable.\nFaites votre choix : ")
 
