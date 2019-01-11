@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 # TODO
-# Voir son propre statut
 # Voir les status de ses amis
-# Ajouter dashboard (nb d'amis, statut du moment)
 
 import redis
 import time
