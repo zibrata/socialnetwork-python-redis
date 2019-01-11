@@ -90,3 +90,20 @@ def str2list(chaine):
 	tab = []
 	tab = chaine.split(',')
 	return tab
+
+def str2listPost(chaine):
+	liste = []
+	if chaine != None:
+		liste = chaine.split("NOUVEAUPOSTSPLIT")
+	return liste
+
+def list2strPost(liste):
+	chaine = ""
+	i = 0
+	for elem in liste:
+		if i == len(liste) - 1:
+			chaine += str(elem)
+		else:
+			chaine += str(elem) + "NOUVEAUPOSTSPLIT"
+		i += 1
+	return chaine

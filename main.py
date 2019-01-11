@@ -59,6 +59,7 @@ def creer_compte():
 	r.hset(usr, "username", pseudo)
 	r.hset(usr, "relations", "")
 	r.hset(usr, "statut", "")
+	r.hset(usr, "posts", "")
 	r.incr("compteur")
 	print("Utilisateur {} créé !".format(pseudo))
 
@@ -94,8 +95,11 @@ def menuPerso(uidPerso):
 	print("3. Supprimer un ami")
 	print("4. Liste d'amis")
 	print("5. Mettre à jour son statut")
-	print("6. Voir le statut de ses amis.")
-	print("7. Déconnexion / Retour au menu")
+	print("6. Voir le statut de ses amis")
+	print("7. Publier un post")
+	print("8. Voir ses posts")
+	print("9. Voir les posts de ses amis")
+	print("10. Déconnexion / Retour au menu")
 
 	connecte = True 
 	choice = input("\nFaites votre choix : ")
@@ -262,8 +266,8 @@ def menuPerso(uidPerso):
 			menuPerso(uidPerso)
 		elif choice == "5": # Mettre à jour son statut
 			usr = "user:" + str(uidPerso)
-			post = str(input("Mettez à jour votre statut du moment : \n"))
-			r.hset(usr, "statut", post)
+			statut = str(input("Mettez à jour votre statut du moment : \n"))
+			r.hset(usr, "statut", statut)
 			print("Statut modifié.")
 			connecte = False
 			menuPerso(uidPerso)
@@ -292,7 +296,64 @@ def menuPerso(uidPerso):
 				print("Cet utilisateur n'existe pas.")
 			connecte = False
 			menuPerso(uidPerso)
-		elif choice == "7": # Déconnexion | Retour au menu
+		elif choice == "7": # Publier un post
+			usr = "user:" + str(uidPerso)
+			post = str(input("Post : \n"))
+			strPosts = r.hget(usr, "posts")
+			mesPosts = str2listPost(strPosts)
+			mesPosts.append(post)
+			strPosts = list2strPost(mesPosts)
+			r.hset(usr, "posts", strPosts)
+			print("Post publié !")
+			connecte = False
+			menuPerso(uidPerso)
+		elif choice == "8": # Voir ses posts
+			usr = "user:" + str(uidPerso)
+			strPosts = r.hget(usr, "posts")
+			if strPosts != "":
+				Posts = str2listPost(strPosts)
+				i = 0
+				while i < len(Posts):
+					if i != 0:
+						print("Post #{} :\n{}".format(i, Posts[i]))
+					i += 1
+			else:
+				print("Vous n'avez rien publié.")
+			connecte = False
+			menuPerso(uidPerso)
+		elif choice == "9": # Voir posts de ses amis
+			nomAmi = input("Ami : ")
+			uidAmi = getUser(nomAmi)
+			if uidAmi != None and uidPerso != None:
+				usr = "user:" + str(uidPerso)
+				strRelations = r.hget(usr, "relations") # on récupère sous forme de str notre liste d'amis
+				mesRelations = str2dico(strRelations) # on transforme ce str en dico
+
+				i = 0
+				while i < len(mesRelations):
+					uid = list(mesRelations)[i]
+					relations = mesRelations.get(uid)
+					# Si l'UID du user est déjà dans la liste de mes relations
+					if uid == str(uidAmi):
+						if relations == "1": # Vous êtes amis, on peut avoir accès à son statut
+							usrFriend = "user:" + str(uid)
+							strFriendPosts = r.hget(usrFriend, "posts")
+							friendPosts = str2listPost(strFriendPosts)
+							j = 0
+							while j < len(friendPosts):
+								if j != 0:
+									print("{} a posté :\n{}".format(nomAmi, friendPosts[j]))
+								j += 1
+							# print("{} a posté : {}".format(nomAmi, r.hget(usrFriend, "posts")))
+						else:
+							print("Vous n'êtes pas amis avec {}.".format(nomAmi))
+						i += 1
+
+			else:
+				print("Cet utilisateur n'existe pas.")
+			connecte = False
+			menuPerso(uidPerso)
+		elif choice == "10": # Déconnexion | Retour au menu
 			print("Vous êtes déconnecté.")
 			connecte = False
 			main() # Deconnexion / Retour au menu 

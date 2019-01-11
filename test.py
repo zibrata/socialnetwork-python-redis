@@ -9,31 +9,50 @@ redis_password = ""
 r = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True)
 
 dico = {'2': '1', '3': '1', '4': '2'}
+# ‡Ò∂ƒﬁÌÏÈ¬
+chaine = "Bonjour à tous‡Ò∂ƒﬁÌÏÈ¬Post #2 la bise‡Ò∂ƒﬁÌÏÈ¬Yo les potes"
 
-
-
-def printDico(dico):
+def list2strPost(liste):
+	chaine = ""
 	i = 0
-	while i < len(dico):
-		key = list(dico)[i]
-		value = dico.get(key)
-		print("{} : {}".format(key, value))
+	for elem in liste:
+		if i == len(liste) - 1:
+			chaine += str(elem)
+		else:
+			chaine += str(elem) + "‡Ò∂ƒﬁÌÏÈ¬"
 		i += 1
+	return chaine
 
-string = "1,1,2,3"
+def str2listPost(chaine):
+	liste = []
+	if chaine != None:
+		liste = chaine.split("NOUVEAUPOSTSPLIT")
+	return liste
 
-def str2dico(chaine):
-	dico = {}
-	i = 0
-	while i < len(chaine): 
-		dico[chaine[i]] = chaine[i+2]
-		i += 4
-	return dico
+print(str2listPost(""))
 
-def str2list(chaine):
-	tab = {}
-	tab = chaine.split(',')
-	return tab
+# def printDico(dico):
+# 	i = 0
+# 	while i < len(dico):
+# 		key = list(dico)[i]
+# 		value = dico.get(key)
+# 		print("{} : {}".format(key, value))
+# 		i += 1
 
-print(str2dico(string))
-print(len(str2dico(string)))
+# string = "1,1,2,3"
+
+# def str2dico(chaine):
+# 	dico = {}
+# 	i = 0
+# 	while i < len(chaine): 
+# 		dico[chaine[i]] = chaine[i+2]
+# 		i += 4
+# 	return dico
+
+# def str2list(chaine):
+# 	tab = {}
+# 	tab = chaine.split(',')
+# 	return tab
+
+# print(str2dico(string))
+# print(len(str2dico(string)))
