@@ -4,8 +4,8 @@
 # Supprimer relationships from liste d'amis
 # Quand add un ami -> (pub/sub) s'abonné à l'autre afin de voir les posts
 
-
 import redis
+import time
 from library import *
 
 redis_host = "127.0.0.1"
@@ -40,11 +40,12 @@ def connexion():
 			return str(creer_compte()) 
 		elif choice == "2":
 			user_pseudo = input("Entrez votre pseudo : ")
-		
 	return str(getUser(user_pseudo))
 
-
 def creer_compte():
+	existIdPost = r.exists("idPost") # Création d'un ID pour les posts
+	if existIdPost != 1:
+		r.set("idPost", 1)
 	exist = r.exists("compteur")
 	if exist == 1:
 		index = int(r.get("compteur"))
@@ -61,6 +62,7 @@ def creer_compte():
 	r.hset(usr, "UID", index + 1)
 	r.hset(usr, "username", pseudo)
 	r.hset(usr, "relations", "")
+	#r.hset(usr, "posts", "")
 	r.incr("compteur")
 	print("Utilisateur {} créé !".format(pseudo))
 
@@ -73,7 +75,9 @@ def menuPerso(uidPerso):
 	print("2. Ajouter un ami")
 	print("3. Supprimer un ami")
 	print("4. Liste d'amis")
-	print("5. Déconnexion / Retour au menu")
+	print("5. Créer un post")
+	print("6. Mes posts")
+	print("7. Déconnexion / Retour au menu")
 
 	connecte = True 
 	choice = input("\nFaites votre choix : ")
@@ -158,7 +162,7 @@ def menuPerso(uidPerso):
 						elif relations == "3":
 							print("Il vous a envoyé une demande. En attente de votre approbation.\nAllez dans vos notifications.")
 						else:
-							print("zer")
+							print("")
 						trouve = True
 						#break
 					i += 1
@@ -240,6 +244,50 @@ def menuPerso(uidPerso):
 			connecte = False 		
 			menuPerso(uidPerso) # Liste d'amis
 		elif choice == "5":
+			usr = "user:" + str(uidPerso)
+			post = input("Ecrivez votre post :\n")
+			data = {}
+			idPost = r.get("idPost")
+			data.update({
+				'publication':post,
+				'posted':time.strftime("%c"),
+				'uid':uidPerso,
+				'id':idPost,
+				'name':getPseudo(uidPerso)
+				})
+			r.hmset(usr, data)
+			r.hincrby('user:%s'%uidPerso, 'posts')
+			r.incr("idPost")
+			print("Post publié")
+			# usr = "user:" + str(uidPerso)
+			# strPosts = r.hget(usr, "posts")
+			# if strPosts == None:
+			# 	strPosts = "1, " + Post
+			# else:
+			# 	mesPosts = str2dico(strPosts)
+			# 	nbPosts = len(mesPosts)
+			# 	tmp = nbPosts + 1
+			# 	tmp = str(tmp)
+			# 	mesPosts[tmp] = post
+			# 	strPosts = dico2str(mesPosts)
+			# r.hset(usr, "posts", strPosts)
+			# print("Post publié.")
+			connecte = False
+			menuPerso(uidPerso)
+		elif choice == "6":
+			usr = "user:" + str(uidPerso)
+			strPosts = r.hget(usr, "posts")
+			if strPosts == None:
+				print("Vous n'avez pas publié de posts.")
+			else:
+				mesPosts = str2dico(strPosts)
+				i = 0
+				while i < len(mesPosts):
+					key = list(mesPosts)[i]
+					value = mesPosts.get(key)
+					print("{}\n{}".format(key, value))
+					i += 1
+		elif choice == "7":
 			# Retour au menu
 			print("Vous êtes déconnecté.")
 			connecte = False
@@ -260,10 +308,6 @@ def main():
 
 		choice = input("\nFaites un choix : ")
 
-		# if choice   == "3":
-		# 	r.flushall();
-		# 	print("Informations supprimées.")
-		# 	break 
 		if choice == "2":
 			quit = True
 			uidPerso = connexion()
@@ -275,8 +319,14 @@ def main():
 			print("À la prochaine ! ")
 			quit = True
 		else:
-			print("I don't understand your choice.")
-
-	
+			print("Rentrez une instruction valable.")
 
 main()
+
+
+
+mongoimport --db classicmodels --collection customers --file customers.json --jsonArray
+mongoimport --db classicmodels --collection customerspayments --file customers_payments_denormalized.json
+mongoimport --db classicmodels --collection orders --file orders.json --jsonArray
+mongoimport --db classicmodels --collection payments --file payments.json --jsonArray
+mongoimport --db classicmodels --collection customersofficespayments --file customers_offices_payments_denormalized.json

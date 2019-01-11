@@ -20,8 +20,14 @@ def printDico(dico):
 		print("{} : {}".format(key, value))
 		i += 1
 
-print(dico)
+string = "1,test #1"
 
-dico["2"] = "4"
+def str2dico(chaine):
+dico = {}
+i = 0
+while i < len(chaine): 
+	dico[chaine[i]] = chaine[i+2]
+	i += 4
+return dico
 
-print(dico)
+dico = str2dico(string)

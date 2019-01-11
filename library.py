@@ -70,7 +70,6 @@ def str2dico(chaine):
 	dico = {}
 	i = 0
 	while i < len(chaine): 
-		#dico.update(chaine[i], chaine[i+2])
 		dico[chaine[i]] = chaine[i+2]
 		i += 4
 	return dico
