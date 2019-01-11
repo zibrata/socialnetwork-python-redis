@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 # TODO
-# Supprimer relationships from liste d'amis
-# Quand add un ami -> (pub/sub) s'abonné à l'autre afin de voir les posts
+# Voir son propre statut
+# Voir les status de ses amis
+# Ajouter dashboard (nb d'amis, statut du moment)
 
 import redis
 import time
@@ -43,9 +44,6 @@ def connexion():
 	return str(getUser(user_pseudo))
 
 def creer_compte():
-	existIdPost = r.exists("idPost") # Création d'un ID pour les posts
-	if existIdPost != 1:
-		r.set("idPost", 1)
 	exist = r.exists("compteur")
 	if exist == 1:
 		index = int(r.get("compteur"))
@@ -62,22 +60,43 @@ def creer_compte():
 	r.hset(usr, "UID", index + 1)
 	r.hset(usr, "username", pseudo)
 	r.hset(usr, "relations", "")
-	#r.hset(usr, "posts", "")
+	r.hset(usr, "statut", "")
 	r.incr("compteur")
 	print("Utilisateur {} créé !".format(pseudo))
 
 	return r.hget(usr, "UID")
 
+def dashboard(uidPerso):
+	usr = "user:" + str(uidPerso)
+	statut = r.hget(usr, "statut")
+	if statut == None:
+		statut = "Vous n'avez pas encore écrit de statut."
+	pseudoPerso = getPseudo(uidPerso)
+	strRelations = r.hget(usr, "relations")
+	mesRelations = str2dico(strRelations)
+	i = 0
+	nbAmis = 0
+	while i < len(mesRelations):
+		key = list(mesRelations)[i]
+		value = mesRelations.get(key)
+		if value == "1":
+			nbAmis += 1
+		i += 1
+	print("\n###############################\n")
+	print("Bienvenue {}\n".format(pseudoPerso))
+	print("Statut : {}".format(statut))
+	print("Nombre d'amis : {}".format(nbAmis))
+	print("\n###############################\n")
+
 def menuPerso(uidPerso):
 	pseudoPerso = getPseudo(uidPerso)
-	print("\nBienvenue {}\n".format(pseudoPerso))
+	dashboard(uidPerso)
 	print("1. Voir vos notifications")
 	print("2. Ajouter un ami")
 	print("3. Supprimer un ami")
 	print("4. Liste d'amis")
-	print("5. Créer un post")
-	print("6. Mes posts")
-	print("7. Déconnexion / Retour au menu")
+	print("5. Mettre à jour son statut")
+	print("6. Déconnexion / Retour au menu")
 
 	connecte = True 
 	choice = input("\nFaites votre choix : ")
@@ -137,7 +156,7 @@ def menuPerso(uidPerso):
 				print("Vous n'avez plus de notifications.")
 
 			connecte = False 
-			menuPerso(uidPerso) # Notifications
+			menuPerso(uidPerso) # Notifications # Voir ses notifications
 		elif choice == "2":
 			# Cherche un user, l'ajoute (si aucune relation précédente) et envoie une request à l'user concerné
 			pseudo = input("Ami à ajouter : ")
@@ -187,7 +206,7 @@ def menuPerso(uidPerso):
 				print("Cet utilisateur n'existe pas.")
 		
 			connecte = False 		
-			menuPerso(uidPerso) # Ajouter un ami
+			menuPerso(uidPerso) # Ajouter un ami # Ajouter un ami
 		elif choice == "3":
 			pseudo = input("Ami à supprimer : ")
 			uidFriend = getUser(pseudo)
@@ -220,7 +239,7 @@ def menuPerso(uidPerso):
 			else:
 				print("Cet utilisateur n'existe pas.")
 			connecte = False 		
-			menuPerso(uidPerso) # Supprimer un ami
+			menuPerso(uidPerso) # Supprimer un ami # Supprimer un ami
 		elif choice == "4":
 			existeAmis = False
 			usr = "user:" + str(uidPerso)
@@ -242,56 +261,18 @@ def menuPerso(uidPerso):
 			if existeAmis == False:
 				print("Vous n'avez pas encore d'amis. Utilisez la fonction '2. Ajouter un ami' afin de retrouver vos connaissances.")
 			connecte = False 		
-			menuPerso(uidPerso) # Liste d'amis
+			menuPerso(uidPerso) # Liste d'amis # Liste d'amis
 		elif choice == "5":
 			usr = "user:" + str(uidPerso)
-			post = input("Ecrivez votre post :\n")
-			data = {}
-			idPost = r.get("idPost")
-			data.update({
-				'publication':post,
-				'posted':time.strftime("%c"),
-				'uid':uidPerso,
-				'id':idPost,
-				'name':getPseudo(uidPerso)
-				})
-			r.hmset(usr, data)
-			r.hincrby('user:%s'%uidPerso, 'posts')
-			r.incr("idPost")
-			print("Post publié")
-			# usr = "user:" + str(uidPerso)
-			# strPosts = r.hget(usr, "posts")
-			# if strPosts == None:
-			# 	strPosts = "1, " + Post
-			# else:
-			# 	mesPosts = str2dico(strPosts)
-			# 	nbPosts = len(mesPosts)
-			# 	tmp = nbPosts + 1
-			# 	tmp = str(tmp)
-			# 	mesPosts[tmp] = post
-			# 	strPosts = dico2str(mesPosts)
-			# r.hset(usr, "posts", strPosts)
-			# print("Post publié.")
+			post = str(input("Mettez à jour votre statut du moment : \n"))
+			r.hset(usr, "statut", post)
+			print("Statut modifié.")
 			connecte = False
-			menuPerso(uidPerso)
+			menuPerso(uidPerso) # Mettre à jour son statut
 		elif choice == "6":
-			usr = "user:" + str(uidPerso)
-			strPosts = r.hget(usr, "posts")
-			if strPosts == None:
-				print("Vous n'avez pas publié de posts.")
-			else:
-				mesPosts = str2dico(strPosts)
-				i = 0
-				while i < len(mesPosts):
-					key = list(mesPosts)[i]
-					value = mesPosts.get(key)
-					print("{}\n{}".format(key, value))
-					i += 1
-		elif choice == "7":
-			# Retour au menu
 			print("Vous êtes déconnecté.")
 			connecte = False
-			main() # Deconnexion / Retour au menu
+			main() # Deconnexion / Retour au menu # Déconnexion / Retour au menu
 		else: 
 			choice = input("Rentrez une instruction valable.\nFaites votre choix : ")
 

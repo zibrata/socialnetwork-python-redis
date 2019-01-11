@@ -68,10 +68,11 @@ def list2str(liste):
 
 def str2dico(chaine):
 	dico = {}
-	i = 0
-	while i < len(chaine): 
-		dico[chaine[i]] = chaine[i+2]
-		i += 4
+	if chaine != None:
+		i = 0
+		while i < len(chaine): 
+			dico[chaine[i]] = chaine[i+2]
+			i += 4
 	return dico
 
 def dico2str(dico):
@@ -85,3 +86,7 @@ def dico2str(dico):
 		i += 1
 	return chaine
 
+def str2list(chaine):
+	tab = []
+	tab = chaine.split(',')
+	return tab

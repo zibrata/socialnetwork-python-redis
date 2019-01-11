@@ -20,14 +20,20 @@ def printDico(dico):
 		print("{} : {}".format(key, value))
 		i += 1
 
-string = "1,test #1"
+string = "1,1,2,3"
 
 def str2dico(chaine):
-dico = {}
-i = 0
-while i < len(chaine): 
-	dico[chaine[i]] = chaine[i+2]
-	i += 4
-return dico
+	dico = {}
+	i = 0
+	while i < len(chaine): 
+		dico[chaine[i]] = chaine[i+2]
+		i += 4
+	return dico
 
-dico = str2dico(string)
+def str2list(chaine):
+	tab = {}
+	tab = chaine.split(',')
+	return tab
+
+print(str2dico(string))
+print(len(str2dico(string)))
