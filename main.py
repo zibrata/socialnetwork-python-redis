@@ -322,11 +322,3 @@ def main():
 			print("Rentrez une instruction valable.")
 
 main()
-
-
-
-mongoimport --db classicmodels --collection customers --file customers.json --jsonArray
-mongoimport --db classicmodels --collection customerspayments --file customers_payments_denormalized.json
-mongoimport --db classicmodels --collection orders --file orders.json --jsonArray
-mongoimport --db classicmodels --collection payments --file payments.json --jsonArray
-mongoimport --db classicmodels --collection customersofficespayments --file customers_offices_payments_denormalized.json
