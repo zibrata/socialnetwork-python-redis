@@ -94,7 +94,8 @@ def menuPerso(uidPerso):
 	print("3. Supprimer un ami")
 	print("4. Liste d'amis")
 	print("5. Mettre à jour son statut")
-	print("6. Déconnexion / Retour au menu")
+	print("6. Voir le statut de ses amis.")
+	print("7. Déconnexion / Retour au menu")
 
 	connecte = True 
 	choice = input("\nFaites votre choix : ")
@@ -266,7 +267,32 @@ def menuPerso(uidPerso):
 			print("Statut modifié.")
 			connecte = False
 			menuPerso(uidPerso)
-		elif choice == "6": # Déconnexion / Retour au menu
+		elif choice == "6": # Voir le statut de ses amis
+			nomAmi = input("Ami : ")
+			uidAmi = getUser(nomAmi)
+			if uidAmi != None and uidPerso != None:
+				usr = "user:" + str(uidPerso)
+				strRelations = r.hget(usr, "relations") # on récupère sous forme de str notre liste d'amis
+				mesRelations = str2dico(strRelations) # on transforme ce str en dico
+
+				i = 0
+				while i < len(mesRelations):
+					uid = list(mesRelations)[i]
+					relations = mesRelations.get(uid)
+					# Si l'UID du user est déjà dans la liste de mes relations
+					if uid == str(uidAmi):
+						if relations == "1": # Vous êtes amis, on peut avoir accès à son statut
+							usrFriend = "user:" + str(uid)
+							print("{} a posté : {}".format(nomAmi, r.hget(usrFriend, "statut")))
+						else:
+							print("Vous n'êtes pas amis avec {}.".format(nomAmi))
+						i += 1
+
+			else:
+				print("Cet utilisateur n'existe pas.")
+			connecte = False
+			menuPerso(uidPerso)
+		elif choice == "7": # Déconnexion | Retour au menu
 			print("Vous êtes déconnecté.")
 			connecte = False
 			main() # Deconnexion / Retour au menu 
