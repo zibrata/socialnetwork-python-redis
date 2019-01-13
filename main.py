@@ -5,6 +5,7 @@
 
 import redis
 import time
+import os
 from library import *
 
 redis_host = "127.0.0.1"
@@ -22,6 +23,9 @@ r = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password,
 def wait(): # Sert à segmanter les tours afin d'améliorer la lisibilité durant le développement/test
 	print("\nAppuyer sur une touche pour continuer\n")
 	input()
+
+def clear(): # Pour clear le dashboard afin d'améliorer la lisibilité dans le terminal
+	os.system("clear")
 
 def connexion():
 	user_pseudo = input("Entrez votre pseudo : ")
@@ -66,6 +70,7 @@ def creer_compte():
 	return r.hget(usr, "UID")
 
 def dashboard(uidPerso):
+	clear()
 	usr = "user:" + str(uidPerso)
 	statut = r.hget(usr, "statut")
 	if statut == "":
@@ -75,16 +80,21 @@ def dashboard(uidPerso):
 	mesRelations = str2dico(strRelations)
 	i = 0
 	nbAmis = 0
+	demandesAjout = False
 	while i < len(mesRelations):
 		key = list(mesRelations)[i]
 		value = mesRelations.get(key)
 		if value == "1":
 			nbAmis += 1
+		elif value == "3":
+			demandesAjout = True
 		i += 1
 	print("\n###############################\n")
 	print("Bienvenue {}\n".format(pseudoPerso))
 	print("Statut : {}".format(statut))
 	print("Nombre d'amis : {}".format(nbAmis))
+	if demandesAjout == True:
+		print("\n# VOUS AVEZ DES NOTIFICATIONS #")
 	print("\n###############################\n")
 
 def menuPerso(uidPerso):
@@ -150,6 +160,7 @@ def menuPerso(uidPerso):
 						del RelationsFriend[uidPerso]
 						strRelationsFriend = dico2str(RelationsFriend)
 						r.hset(usrFriend, "relations", strRelationsFriend)
+						# 2/2
 						print("Invitation refusée.")
 				i += 1
 
@@ -157,7 +168,7 @@ def menuPerso(uidPerso):
 				print("Vous n'avez pas de notifications.")
 			else:
 				print("Vous n'avez plus de notifications.")
-
+			wait()
 			connecte = False 
 			menuPerso(uidPerso) # Notifications # Voir ses notifications
 		elif choice == "2": # Cherche un user, l'ajoute (si aucune relation précédente) et envoie une request à l'user concerné
@@ -206,7 +217,7 @@ def menuPerso(uidPerso):
 				
 			else:
 				print("Cet utilisateur n'existe pas.")
-		
+			wait()
 			connecte = False 		
 			menuPerso(uidPerso)
 		elif choice == "3": # Supprimer un ami
@@ -240,6 +251,7 @@ def menuPerso(uidPerso):
 					i += 1
 			else:
 				print("Cet utilisateur n'existe pas.")
+			wait()
 			connecte = False 		
 			menuPerso(uidPerso)
 		elif choice == "4": # Liste d'amis
@@ -262,6 +274,7 @@ def menuPerso(uidPerso):
 				i += 1
 			if existeAmis == False:
 				print("Vous n'avez pas encore d'amis. Utilisez la fonction '2. Ajouter un ami' afin de retrouver vos connaissances.")
+			wait()
 			connecte = False 		
 			menuPerso(uidPerso)
 		elif choice == "5": # Mettre à jour son statut
@@ -269,6 +282,7 @@ def menuPerso(uidPerso):
 			statut = str(input("Mettez à jour votre statut du moment : \n"))
 			r.hset(usr, "statut", statut)
 			print("Statut modifié.")
+			wait()
 			connecte = False
 			menuPerso(uidPerso)
 		elif choice == "6": # Voir le statut de ses amis
@@ -294,6 +308,7 @@ def menuPerso(uidPerso):
 
 			else:
 				print("Cet utilisateur n'existe pas.")
+			wait()
 			connecte = False
 			menuPerso(uidPerso)
 		elif choice == "7": # Publier un post
@@ -305,6 +320,7 @@ def menuPerso(uidPerso):
 			strPosts = list2strPost(mesPosts)
 			r.hset(usr, "posts", strPosts)
 			print("Post publié !")
+			wait()
 			connecte = False
 			menuPerso(uidPerso)
 		elif choice == "8": # Voir ses posts
@@ -319,6 +335,7 @@ def menuPerso(uidPerso):
 					i += 1
 			else:
 				print("Vous n'avez rien publié.")
+			wait()
 			connecte = False
 			menuPerso(uidPerso)
 		elif choice == "9": # Voir posts de ses amis
@@ -351,10 +368,12 @@ def menuPerso(uidPerso):
 
 			else:
 				print("Cet utilisateur n'existe pas.")
+			wait()
 			connecte = False
 			menuPerso(uidPerso)
 		elif choice == "10": # Déconnexion | Retour au menu
 			print("Vous êtes déconnecté.")
+			wait()
 			connecte = False
 			main() # Deconnexion / Retour au menu 
 		else: 
